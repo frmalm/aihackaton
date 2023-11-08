@@ -1,125 +1,163 @@
 ﻿using System;
-using System.Collections.Generic;
-class Program
+class Game
 {
-    static int width = 20;
-    static int height = 20;
-    static int ambulanceX = 0;
-    static int ambulanceY = 0;
-    static int patientX = 0;
-    static int patientY = 0;
-    static int score = 0;
-    static List<string> maze;
-    static void Main(string[] args)
+    // Constants for maze size and symbols
+    const int MazeSize = 20;
+    const char WallSymbol = '#';
+    const char EmptySymbol = ' ';
+    const char AmbulanceSymbol = 'A';
+    const char PatientSymbol = 'P';
+    // Coordinates for ambulance and patient
+    int ambulanceX, ambulanceY;
+    int patientX, patientY;
+    // Maze array
+    char[,] maze;
+    // Variables for game state
+    int score;
+    bool gameOver;
+    public void Play()
     {
-        Console.Title = "Ambulance Maze Game";
-        Console.CursorVisible = false;
-        GenerateMaze();
-        DrawMaze();
-        GeneratePatient();
-        while (score < 10)
+        InitializeMaze();
+        while (!gameOver)
         {
-            if (Console.KeyAvailable)
+            Console.Clear();
+            DrawMaze();
+            // Get user input for ambulance movement
+            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+            if (CanAmbulanceMove(keyInfo.Key))
             {
-                var key = Console.ReadKey(intercept: true).Key;
-                MoveAmbulance(key);
+                MoveAmbulance(keyInfo.Key);
                 CheckCollision();
             }
         }
-        Console.Clear();
-        Console.WriteLine("Congratulations! You have reached all the patients.");
-        Console.WriteLine("Press any key to exit...");
-        Console.ReadKey();
+        Console.WriteLine("Game over! Final score: " + score);
     }
-    static void GenerateMaze()
+    void InitializeMaze()
     {
-        maze = new List<string>();
+        // Create maze
+        maze = new char[MazeSize, MazeSize];
+        // Generate random walls
         Random random = new Random();
-        for (int i = 0; i < height; i++)
+        for (int i = 0; i < MazeSize; i++)
         {
-            string row = "";
-            for (int j = 0; j < width; j++)
+            for (int j = 0; j < MazeSize; j++)
             {
-                if (i == 0 || i == height - 1 || j == 0 || j == width - 1 || random.Next(0, 4) < 1)
+                if (random.NextDouble() < 0.2)
                 {
-                    row += "#";
+                    maze[i, j] = WallSymbol;
                 }
                 else
                 {
-                    row += " ";
+                    maze[i, j] = EmptySymbol;
                 }
             }
-            maze.Add(row);
         }
+        // Place ambulance and patient
+        ambulanceX = random.Next(MazeSize);
+        ambulanceY = random.Next(MazeSize);
+        maze[ambulanceX, ambulanceY] = AmbulanceSymbol;
+        patientX = random.Next(MazeSize);
+        patientY = random.Next(MazeSize);
+        maze[patientX, patientY] = PatientSymbol;
+        score = 0;
+        gameOver = false;
     }
-    static void DrawMaze()
+    void DrawMaze()
     {
-        Console.Clear();
-        for (int y = 0; y < height; y++)
+        for (int i = 0; i < MazeSize; i++)
         {
-            for (int x = 0; x < width; x++)
+            for (int j = 0; j < MazeSize; j++)
             {
-                Console.SetCursorPosition(x, y);
-                Console.Write(maze[y][x]);
+                Console.ForegroundColor = GetSymbolColor(maze[i, j]);
+                Console.Write(maze[i, j]);
             }
+            Console.WriteLine();
         }
-        ambulanceX = 1;
-        ambulanceY = 1;
-        Console.SetCursorPosition(ambulanceX, ambulanceY);
-        Console.Write("A");
+        Console.ForegroundColor = ConsoleColor.White;
+        Console.WriteLine("Score: " + score);
+        Console.WriteLine("Use arrow keys to move the ambulance");
     }
-    static void GeneratePatient()
+    ConsoleColor GetSymbolColor(char symbol)
     {
-        Random random = new Random();
-        int x, y;
-        do
-        {
-            x = random.Next(1, width - 1);
-            y = random.Next(1, height - 1);
-        } while (maze[y][x] != ' ');
-        patientX = x;
-        patientY = y;
-        Console.SetCursorPosition(patientX, patientY);
-        Console.Write("P");
+        if (symbol == AmbulanceSymbol)
+            return ConsoleColor.Red;
+        else if (symbol == PatientSymbol)
+            return ConsoleColor.Yellow;
+        else if (symbol == WallSymbol)
+            return ConsoleColor.Gray;
+        else
+            return ConsoleColor.Black;
     }
-    static void MoveAmbulance(ConsoleKey key)
+    bool CanAmbulanceMove(ConsoleKey key)
     {
-        int newAmbulanceX = ambulanceX;
-        int newAmbulanceY = ambulanceY;
-        switch (key)
+        if (key == ConsoleKey.UpArrow)
         {
-            case ConsoleKey.UpArrow:
-                newAmbulanceY--;
-                break;
-            case ConsoleKey.DownArrow:
-                newAmbulanceY++;
-                break;
-            case ConsoleKey.LeftArrow:
-                newAmbulanceX--;
-                break;
-            case ConsoleKey.RightArrow:
-                newAmbulanceX++;
-                break;
-            default:
-                return;
+            return (ambulanceX > 0 && maze[ambulanceX - 1, ambulanceY] != WallSymbol);
         }
-        if (maze[newAmbulanceY][newAmbulanceX] == '#')
-            return;
-        Console.SetCursorPosition(ambulanceX, ambulanceY);
-        Console.Write(" ");
-        ambulanceX = newAmbulanceX;
-        ambulanceY = newAmbulanceY;
-        Console.SetCursorPosition(ambulanceX, ambulanceY);
-        Console.Write("A");
+        else if (key == ConsoleKey.DownArrow)
+        {
+            return (ambulanceX < MazeSize - 1 && maze[ambulanceX + 1, ambulanceY] != WallSymbol);
+        }
+        else if (key == ConsoleKey.LeftArrow)
+        {
+            return (ambulanceY > 0 && maze[ambulanceX, ambulanceY - 1] != WallSymbol);
+        }
+        else if (key == ConsoleKey.RightArrow)
+        {
+            return (ambulanceY < MazeSize - 1 && maze[ambulanceX, ambulanceY + 1] != WallSymbol);
+        }
+        return false;
     }
-    static void CheckCollision()
+
+    void MoveAmbulance(ConsoleKey key)
     {
+        // Clear old ambulance position
+        maze[ambulanceX, ambulanceY] = EmptySymbol;
+        // Move ambulance
+        if (key == ConsoleKey.UpArrow)
+            ambulanceX--;
+        else if (key == ConsoleKey.DownArrow)
+            ambulanceX++;
+        else if (key == ConsoleKey.LeftArrow)
+            ambulanceY--;
+        else if (key == ConsoleKey.RightArrow)
+            ambulanceY++;
+        // Place ambulance in new position
+        maze[ambulanceX, ambulanceY] = AmbulanceSymbol;
+    }
+    void CheckCollision()
+    {
+        // Check if ambulance reached patient
         if (ambulanceX == patientX && ambulanceY == patientY)
         {
             score++;
-            Console.SetCursorPosition(patientX, patientY);
-            Console.Write(" ");
-            GeneratePatient();
+            if (score >= 10)
+            {
+                gameOver = true;
+            }
+            else
+            {
+                // Generate new patient position
+                Random random = new Random();
+                while (true)
+                {
+                    patientX = random.Next(MazeSize);
+                    patientY = random.Next(MazeSize);
+                    if (maze[patientX, patientY] == EmptySymbol)
+                    {
+                        maze[patientX, patientY] = PatientSymbol;
+                        break;
+                    }
+                }
+            }
         }
+    }
+}
+class Program
+{
+    static void Main(string[] args)
+    {
+        Game game = new Game();
+        game.Play();
     }
 }
