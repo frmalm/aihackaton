@@ -1,32 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading;
 class Program
 {
-    static int width = 19;
-    static int height = 10;
+    static int width = 20;
+    static int height = 20;
     static int ambulanceX = 0;
     static int ambulanceY = 0;
     static int patientX = 0;
     static int patientY = 0;
     static int score = 0;
-    static List<string> maze = new List<string>
-    {
-        "###################",
-        "#                 #",
-        "# # # ####### # # #",
-        "#   #          #  #",
-        "#### ### ### # #  #",
-        "#        #   # #  #",
-        "# ### # ### # #   #",
-        "#   # #        ## #",
-        "#                 #",
-        "###################"
-    };
+    static List<string> maze;
     static void Main(string[] args)
     {
         Console.Title = "Ambulance Maze Game";
         Console.CursorVisible = false;
+        GenerateMaze();
         DrawMaze();
         GeneratePatient();
         while (score < 10)
@@ -43,6 +31,27 @@ class Program
         Console.WriteLine("Press any key to exit...");
         Console.ReadKey();
     }
+    static void GenerateMaze()
+    {
+        maze = new List<string>();
+        Random random = new Random();
+        for (int i = 0; i < height; i++)
+        {
+            string row = "";
+            for (int j = 0; j < width; j++)
+            {
+                if (i == 0 || i == height - 1 || j == 0 || j == width - 1 || random.Next(0, 4) < 1)
+                {
+                    row += "#";
+                }
+                else
+                {
+                    row += " ";
+                }
+            }
+            maze.Add(row);
+        }
+    }
     static void DrawMaze()
     {
         Console.Clear();
@@ -54,6 +63,8 @@ class Program
                 Console.Write(maze[y][x]);
             }
         }
+        ambulanceX = 1;
+        ambulanceY = 1;
         Console.SetCursorPosition(ambulanceX, ambulanceY);
         Console.Write("A");
     }
