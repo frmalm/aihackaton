@@ -25,4 +25,11 @@ The ambulance should be able to move around in the maze with the arrow keys.
 The ambulance should not be able to move through walls.
 The ambulance should not be able to move outside the maze.
 The ambulance must be able to reach the patient.
+The walls of the maze should be indicated with a # in color white.
+With key escape the game should end.
+With key r the game should restart with a new maze.
+With key p the game should pause.
+With key s the game should start again.
+With key h the game should show the help text. And with key h again the help text should disappear. The help text should be in color white.
+The help text should be: Var snabb och alert!!!!
 

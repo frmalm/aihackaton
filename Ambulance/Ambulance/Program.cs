@@ -15,6 +15,7 @@ class Game
     // Variables for game state
     int score;
     bool gameOver;
+    bool showHelp;
     public void Play()
     {
         InitializeMaze();
@@ -22,12 +23,36 @@ class Game
         {
             Console.Clear();
             DrawMaze();
-            // Get user input for ambulance movement
+            // Get user input for game control
             ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-            if (CanAmbulanceMove(keyInfo.Key))
+            if (keyInfo.Key == ConsoleKey.UpArrow || keyInfo.Key == ConsoleKey.DownArrow ||
+                keyInfo.Key == ConsoleKey.LeftArrow || keyInfo.Key == ConsoleKey.RightArrow)
             {
-                MoveAmbulance(keyInfo.Key);
-                CheckCollision();
+                if (!showHelp && CanAmbulanceMove(keyInfo.Key))
+                {
+                    MoveAmbulance(keyInfo.Key);
+                    CheckCollision();
+                }
+            }
+            else if (keyInfo.Key == ConsoleKey.Escape)
+            {
+                gameOver = true;
+            }
+            else if (keyInfo.Key == ConsoleKey.R)
+            {
+                InitializeMaze();
+            }
+            else if (keyInfo.Key == ConsoleKey.P)
+            {
+                PauseGame();
+            }
+            else if (keyInfo.Key == ConsoleKey.S)
+            {
+                ResumeGame();
+            }
+            else if (keyInfo.Key == ConsoleKey.H)
+            {
+                ToggleHelp();
             }
         }
         Console.WriteLine("Game over! Final score: " + score);
@@ -61,6 +86,7 @@ class Game
         maze[patientX, patientY] = PatientSymbol;
         score = 0;
         gameOver = false;
+        showHelp = false;
     }
     void DrawMaze()
     {
@@ -76,6 +102,16 @@ class Game
         Console.ForegroundColor = ConsoleColor.White;
         Console.WriteLine("Score: " + score);
         Console.WriteLine("Use arrow keys to move the ambulance");
+        Console.WriteLine("Press 'R' to restart the game");
+        Console.WriteLine("Press 'P' to pause the game");
+        Console.WriteLine("Press 'S' to resume the game");
+        Console.WriteLine("Press 'H' to toggle help");
+
+        if (showHelp)
+        {
+            Console.ForegroundColor = ConsoleColor.White;
+            Console.WriteLine("Var snabb och alert!!!!");
+        }
     }
     ConsoleColor GetSymbolColor(char symbol)
     {
@@ -84,7 +120,7 @@ class Game
         else if (symbol == PatientSymbol)
             return ConsoleColor.Yellow;
         else if (symbol == WallSymbol)
-            return ConsoleColor.Gray;
+            return ConsoleColor.White;
         else
             return ConsoleColor.Black;
     }
@@ -108,7 +144,6 @@ class Game
         }
         return false;
     }
-
     void MoveAmbulance(ConsoleKey key)
     {
         // Clear old ambulance position
@@ -151,6 +186,29 @@ class Game
                 }
             }
         }
+    }
+    void PauseGame()
+    {
+        Console.Clear();
+        DrawMaze();
+        Console.WriteLine("Game paused. Press 'S' to resume.");
+        while (true)
+        {
+            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
+            if (keyInfo.Key == ConsoleKey.S)
+            {
+                break;
+            }
+        }
+    }
+    void ResumeGame()
+    {
+        Console.Clear();
+        DrawMaze();
+    }
+    void ToggleHelp()
+    {
+        showHelp = !showHelp;
     }
 }
 class Program
