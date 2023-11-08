@@ -1,221 +1,203 @@
 ﻿using System;
-class Game
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+namespace AmbulanceGame
 {
-    // Constants for maze size and symbols
-    const int MazeSize = 20;
-    const char WallSymbol = '#';
-    const char EmptySymbol = ' ';
-    const char AmbulanceSymbol = 'A';
-    const char PatientSymbol = 'P';
-    // Coordinates for ambulance and patient
-    int ambulanceX, ambulanceY;
-    int patientX, patientY;
-    // Maze array
-    char[,] maze;
-    // Variables for game state
-    int score;
-    bool gameOver;
-    bool showHelp;
-    public void Play()
+    class Program
     {
-        InitializeMaze();
-        while (!gameOver)
+        static int width = 60;
+        static int height = 20;
+        static char[,] maze;
+        static int ambulanceX;
+        static int ambulanceY;
+        static int patientX;
+        static int patientY;
+        static int score;
+        static bool running;
+        static bool paused;
+        static bool helpVisible;
+        static void Main(string[] args)
         {
-            Console.Clear();
+            InitializeGame();
             DrawMaze();
-            // Get user input for game control
-            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-            if (keyInfo.Key == ConsoleKey.UpArrow || keyInfo.Key == ConsoleKey.DownArrow ||
-                keyInfo.Key == ConsoleKey.LeftArrow || keyInfo.Key == ConsoleKey.RightArrow)
+            while (running)
             {
-                if (!showHelp && CanAmbulanceMove(keyInfo.Key))
+                if (!paused)
                 {
-                    MoveAmbulance(keyInfo.Key);
-                    CheckCollision();
+                    Update();
+                    DrawMaze();
                 }
-            }
-            else if (keyInfo.Key == ConsoleKey.Escape)
-            {
-                gameOver = true;
-            }
-            else if (keyInfo.Key == ConsoleKey.R)
-            {
-                InitializeMaze();
-            }
-            else if (keyInfo.Key == ConsoleKey.P)
-            {
-                PauseGame();
-            }
-            else if (keyInfo.Key == ConsoleKey.S)
-            {
-                ResumeGame();
-            }
-            else if (keyInfo.Key == ConsoleKey.H)
-            {
-                ToggleHelp();
-            }
-        }
-        Console.WriteLine("Game over! Final score: " + score);
-    }
-    void InitializeMaze()
-    {
-        // Create maze
-        maze = new char[MazeSize, MazeSize];
-        // Generate random walls
-        Random random = new Random();
-        for (int i = 0; i < MazeSize; i++)
-        {
-            for (int j = 0; j < MazeSize; j++)
-            {
-                if (random.NextDouble() < 0.2)
+                if (Console.KeyAvailable)
                 {
-                    maze[i, j] = WallSymbol;
-                }
-                else
-                {
-                    maze[i, j] = EmptySymbol;
-                }
-            }
-        }
-        // Place ambulance and patient
-        ambulanceX = random.Next(MazeSize);
-        ambulanceY = random.Next(MazeSize);
-        maze[ambulanceX, ambulanceY] = AmbulanceSymbol;
-        patientX = random.Next(MazeSize);
-        patientY = random.Next(MazeSize);
-        maze[patientX, patientY] = PatientSymbol;
-        score = 0;
-        gameOver = false;
-        showHelp = false;
-    }
-    void DrawMaze()
-    {
-        for (int i = 0; i < MazeSize; i++)
-        {
-            for (int j = 0; j < MazeSize; j++)
-            {
-                Console.ForegroundColor = GetSymbolColor(maze[i, j]);
-                Console.Write(maze[i, j]);
-            }
-            Console.WriteLine();
-        }
-        Console.ForegroundColor = ConsoleColor.White;
-        Console.WriteLine("Score: " + score);
-        Console.WriteLine("Use arrow keys to move the ambulance");
-        Console.WriteLine("Press 'R' to restart the game");
-        Console.WriteLine("Press 'P' to pause the game");
-        Console.WriteLine("Press 'S' to resume the game");
-        Console.WriteLine("Press 'H' to toggle help");
-
-        if (showHelp)
-        {
-            Console.ForegroundColor = ConsoleColor.White;
-            Console.WriteLine("Var snabb och alert!!!!");
-        }
-    }
-    ConsoleColor GetSymbolColor(char symbol)
-    {
-        if (symbol == AmbulanceSymbol)
-            return ConsoleColor.Red;
-        else if (symbol == PatientSymbol)
-            return ConsoleColor.Yellow;
-        else if (symbol == WallSymbol)
-            return ConsoleColor.White;
-        else
-            return ConsoleColor.Black;
-    }
-    bool CanAmbulanceMove(ConsoleKey key)
-    {
-        if (key == ConsoleKey.UpArrow)
-        {
-            return (ambulanceX > 0 && maze[ambulanceX - 1, ambulanceY] != WallSymbol);
-        }
-        else if (key == ConsoleKey.DownArrow)
-        {
-            return (ambulanceX < MazeSize - 1 && maze[ambulanceX + 1, ambulanceY] != WallSymbol);
-        }
-        else if (key == ConsoleKey.LeftArrow)
-        {
-            return (ambulanceY > 0 && maze[ambulanceX, ambulanceY - 1] != WallSymbol);
-        }
-        else if (key == ConsoleKey.RightArrow)
-        {
-            return (ambulanceY < MazeSize - 1 && maze[ambulanceX, ambulanceY + 1] != WallSymbol);
-        }
-        return false;
-    }
-    void MoveAmbulance(ConsoleKey key)
-    {
-        // Clear old ambulance position
-        maze[ambulanceX, ambulanceY] = EmptySymbol;
-        // Move ambulance
-        if (key == ConsoleKey.UpArrow)
-            ambulanceX--;
-        else if (key == ConsoleKey.DownArrow)
-            ambulanceX++;
-        else if (key == ConsoleKey.LeftArrow)
-            ambulanceY--;
-        else if (key == ConsoleKey.RightArrow)
-            ambulanceY++;
-        // Place ambulance in new position
-        maze[ambulanceX, ambulanceY] = AmbulanceSymbol;
-    }
-    void CheckCollision()
-    {
-        // Check if ambulance reached patient
-        if (ambulanceX == patientX && ambulanceY == patientY)
-        {
-            score++;
-            if (score >= 10)
-            {
-                gameOver = true;
-            }
-            else
-            {
-                // Generate new patient position
-                Random random = new Random();
-                while (true)
-                {
-                    patientX = random.Next(MazeSize);
-                    patientY = random.Next(MazeSize);
-                    if (maze[patientX, patientY] == EmptySymbol)
+                    var key = Console.ReadKey(true).Key;
+                    if (key == ConsoleKey.Escape)
                     {
-                        maze[patientX, patientY] = PatientSymbol;
-                        break;
+                        running = false;
+                    }
+                    else if (key == ConsoleKey.R)
+                    {
+                        InitializeGame();
+                        DrawMaze();
+                    }
+                    else if (key == ConsoleKey.P)
+                    {
+                        paused = !paused;
+                    }
+                    else if (key == ConsoleKey.S)
+                    {
+                        paused = false;
+                    }
+                    else if (key == ConsoleKey.H)
+                    {
+                        helpVisible = !helpVisible;
+                        DrawMaze();
+                    }
+                    else if (!paused)
+                    {
+                        MoveAmbulance(key);
                     }
                 }
             }
         }
-    }
-    void PauseGame()
-    {
-        Console.Clear();
-        DrawMaze();
-        Console.WriteLine("Game paused. Press 'S' to resume.");
-        while (true)
+        static void InitializeGame()
         {
-            ConsoleKeyInfo keyInfo = Console.ReadKey(true);
-            if (keyInfo.Key == ConsoleKey.S)
+            maze = new char[height, width];
+            ambulanceX = 0;
+            ambulanceY = 0;
+            patientX = 0;
+            patientY = 0;
+            score = 0;
+            running = true;
+            paused = false;
+            helpVisible = false;
+            GenerateMaze();
+            PlaceAmbulance();
+            PlacePatient();
+        }
+        static void GenerateMaze()
+        {
+            Random random = new Random();
+            for (int i = 0; i < height; i++)
             {
-                break;
+                for (int j = 0; j < width; j++)
+                {
+                    if (i == 0 || i == height - 1 || j == 0 || j == width - 1)
+                    {
+                        maze[i, j] = '#';
+                    }
+                    else if (random.Next(100) < 20)
+                    {
+                        maze[i, j] = '#';
+                    }
+                    else
+                    {
+                        maze[i, j] = ' ';
+                    }
+                }
             }
         }
-    }
-    void ResumeGame()
-    {
-        Console.Clear();
-        DrawMaze();
-    }
-    void ToggleHelp()
-    {
-        showHelp = !showHelp;
-    }
-}
-class Program
-{
-    static void Main(string[] args)
-    {
-        Game game = new Game();
-        game.Play();
+        static void PlaceAmbulance()
+        {
+            Random random = new Random();
+            do
+            {
+                ambulanceX = random.Next(1, width - 1);
+                ambulanceY = random.Next(1, height - 1);
+            } while (maze[ambulanceY, ambulanceX] != ' ');
+            maze[ambulanceY, ambulanceX] = 'A';
+        }
+        static void PlacePatient()
+        {
+            Random random = new Random();
+            do
+            {
+                patientX = random.Next(1, width - 1);
+                patientY = random.Next(1, height - 1);
+            } while (maze[patientY, patientX] != ' ');
+            maze[patientY, patientX] = 'P';
+        }
+        static void MoveAmbulance(ConsoleKey key)
+        {
+            int newAmbulanceX = ambulanceX;
+            int newAmbulanceY = ambulanceY;
+            if (key == ConsoleKey.UpArrow)
+            {
+                newAmbulanceY--;
+            }
+            else if (key == ConsoleKey.DownArrow)
+            {
+                newAmbulanceY++;
+            }
+            else if (key == ConsoleKey.LeftArrow)
+            {
+                newAmbulanceX--;
+            }
+            else if (key == ConsoleKey.RightArrow)
+            {
+                newAmbulanceX++;
+            }
+            if (maze[newAmbulanceY, newAmbulanceX] == '#')
+            {
+                return;
+            }
+            if (newAmbulanceX == patientX && newAmbulanceY == patientY)
+            {
+                score++;
+                PlacePatient();
+            }
+            maze[ambulanceY, ambulanceX] = ' ';
+            ambulanceX = newAmbulanceX;
+            ambulanceY = newAmbulanceY;
+            maze[ambulanceY, ambulanceX] = 'A';
+            if (score == 3)
+            {
+                running = false;
+                Console.WriteLine("Congratulations, you won!");
+            }
+        }
+        static void Update()
+        {
+            // Add any game logic here
+        }
+        static void DrawMaze()
+        {
+            Console.Clear();
+            for (int i = 0; i < height; i++)
+            {
+                for (int j = 0; j < width; j++)
+                {
+                    if (ambulanceX == j && ambulanceY == i)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Red;
+                    }
+                    else if (patientX == j && patientY == i)
+                    {
+                        Console.ForegroundColor = ConsoleColor.Green;
+                    }
+                    else if (maze[i, j] == '#')
+                    {
+                        Console.ForegroundColor = ConsoleColor.Gray;
+                    }
+                    else if (maze[i, j] == ' ')
+                    {
+                        Console.ForegroundColor = ConsoleColor.Black;
+                    }
+                    else
+                    {
+                        Console.ForegroundColor = ConsoleColor.White;
+                    }
+                    Console.Write(maze[i, j]);
+                }
+                Console.WriteLine();
+            }
+            if (helpVisible)
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("Var snabb och alert!!!!");
+                Console.WriteLine("Keys available: UpArrow, DownArrow, LeftArrow, RightArrow, Escape, R, P, S, H");
+            }
+        }
     }
 }
