@@ -163,7 +163,8 @@ namespace AmbulanceGame
         }
         static void DrawMaze()
         {
-            Console.Clear();
+            //Console.Clear();
+            Console.SetCursorPosition(0, 0);
             for (int i = 0; i < height; i++)
             {
                 for (int j = 0; j < width; j++)
