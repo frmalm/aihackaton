@@ -1,0 +1,7 @@
+C:\Repos\aihackaton\Ambulance\Ambulance\bin\Debug\Ambulance.exe.config
+C:\Repos\aihackaton\Ambulance\Ambulance\bin\Debug\Ambulance.exe
+C:\Repos\aihackaton\Ambulance\Ambulance\bin\Debug\Ambulance.pdb
+C:\Repos\aihackaton\Ambulance\Ambulance\obj\Debug\Ambulance.csproj.AssemblyReference.cache
+C:\Repos\aihackaton\Ambulance\Ambulance\obj\Debug\Ambulance.csproj.CoreCompileInputs.cache
+C:\Repos\aihackaton\Ambulance\Ambulance\obj\Debug\Ambulance.exe
+C:\Repos\aihackaton\Ambulance\Ambulance\obj\Debug\Ambulance.pdb
